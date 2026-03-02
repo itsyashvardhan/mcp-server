@@ -1,22 +1,22 @@
-# 🔍 Job Listings MCP Server
+# MCP Server
 
 A standalone Python microservice that **scrapes fresh job listings** using [Jobspy](https://github.com/Bunsly/JobSpy), stores them in SQLite with deduplication, and exposes a **`/jobs` REST endpoint** for embedding in a portfolio site as a live feed.
 
 ---
 
-## ⚡ Features
+## Features
 
-- **Multi-site scraping** — LinkedIn, Indeed (Glassdoor + ZipRecruiter optional)
-- **Tiered role search** — 4 priority tiers of job roles (Solutions Engineer → Data Analyst)
-- **Smart deduplication** — Unique constraint on `(job_title, company, location)`
-- **APScheduler** — Automated scrapes every 1 hour (configurable)
-- **Query filtering** — `?location=`, `?keyword=`, `?hours=` query params
-- **CORS-enabled** — Ready for cross-origin fetch from your portfolio
-- **Deploy-ready** — Dockerfile, Procfile, and railway.toml included
+- **Multi-site scraping** 
+- **Tiered role search** 
+- **Smart deduplication**
+- **APScheduler**
+- **Query filtering** 
+- **CORS-enabled**
+- **Deploy-ready**
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 ```
 APScheduler (1hr)  →  Jobspy Scraper  →  SQLite (deduped)  ←  FastAPI /jobs
@@ -24,20 +24,7 @@ APScheduler (1hr)  →  Jobspy Scraper  →  SQLite (deduped)  ←  FastAPI /job
                                                           Portfolio Site (fetch)
 ```
 
----
-
-## 📋 Role Tiers
-
-| Tier | Roles |
-|------|-------|
-| **T1 — Primary** | Solutions Engineer, Pre-sales Engineer, Forward Deployed Engineer |
-| **T2 — Secondary** | AI Solutions Engineer, AI Implementation Consultant, AI Product Specialist |
-| **T3 — Tertiary** | Implementation Consultant, Technical Consultant, SaaS Implementation Analyst |
-| **T4 — Fallback** | Business Analyst, Data Analyst |
-
----
-
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Clone & Install
 
@@ -65,7 +52,7 @@ The server starts at `http://localhost:8000`. An initial scrape runs automatical
 
 ---
 
-## 📡 API Endpoints
+## API Endpoints
 
 ### `GET /` — Health Check
 
@@ -145,7 +132,7 @@ curl http://localhost:8000/roles
 
 ---
 
-## 🐳 Deployment
+## Deployment
 
 ### Railway
 
@@ -184,43 +171,6 @@ async function fetchJobs(filters?: { location?: string; keyword?: string; hours?
 }
 ```
 
----
-
-## 📝 Environment Variables
-
-| Variable               | Default                          | Description                        |
-|------------------------|----------------------------------|------------------------------------|
-| `SCRAPE_INTERVAL_HOURS`| `1`                              | Hours between automated scrapes    |
-| `RESULTS_PER_QUERY`    | `25`                             | Max results per search query       |
-| `HOURS_OLD`            | `24`                             | Only scrape jobs posted within N hours |
-| `COUNTRY`              | `USA`                            | Country filter for Indeed           |
-| `IS_REMOTE`            | `false`                          | Filter for remote-only jobs        |
-| `SCRAPE_SITES`         | `linkedin,indeed`                | Comma-separated sites to scrape    |
-| `ALLOWED_ORIGINS`      | `http://localhost:3000,...`       | CORS allowed origins               |
-| `HOST`                 | `0.0.0.0`                        | Server host                        |
-| `PORT`                 | `8000`                           | Server port                        |
-| `DATA_DIR`             | `.`                              | Directory for SQLite DB file       |
-
----
-
-## 📁 Project Structure
-
-```
-jobs-mcp-server/
-├── main.py              # FastAPI app + APScheduler + endpoints
-├── scraper.py           # Jobspy scraping logic
-├── database.py          # SQLite schema + CRUD
-├── config.py            # Configuration + role tiers
-├── requirements.txt     # Python dependencies
-├── Dockerfile           # Container build
-├── Procfile             # Render process file
-├── railway.toml         # Railway config
-├── .env.example         # Environment template
-├── .gitignore           # Git ignore rules
-└── README.md            # This file
-```
-
----
 
 ## License
 
