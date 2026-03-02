@@ -148,6 +148,24 @@ def insert_jobs_bulk(jobs: list[dict[str, Any]]) -> int:
 
     return after - before
 
+
+def purge_old_jobs(days: int = 7) -> int:
+    """Delete jobs older than the provided number of days."""
+    if days < 1:
+        return 0
+
+    with get_db() as conn:
+        result = conn.execute(
+            """
+            DELETE FROM jobs
+            WHERE julianday(date_scraped) < julianday('now', ?)
+            """,
+            (f"-{days} days",),
+        )
+        conn.commit()
+        return result.rowcount if result.rowcount is not None else 0
+
+
 def query_jobs(
     location: str | None = None,
     keyword: str | None = None,

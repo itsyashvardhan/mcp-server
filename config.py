@@ -10,6 +10,7 @@ DATA_DIR = Path(os.getenv("DATA_DIR", "."))
 DB_PATH = DATA_DIR / "jobs.db"
 
 SCRAPE_INTERVAL_HOURS = int(os.getenv("SCRAPE_INTERVAL_HOURS", "1"))
+JOB_RETENTION_DAYS = int(os.getenv("JOB_RETENTION_DAYS", "7"))
 
 RESULTS_PER_QUERY = int(os.getenv("RESULTS_PER_QUERY", "25"))
 HOURS_OLD = int(os.getenv("HOURS_OLD", "24"))  # only jobs posted in last N hours

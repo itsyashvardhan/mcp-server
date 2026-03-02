@@ -16,11 +16,12 @@ from config import (
     COUNTRY,
     HOURS_OLD,
     IS_REMOTE,
+    JOB_RETENTION_DAYS,
     RESULTS_PER_QUERY,
     ROLE_TIERS,
     SCRAPE_SITES,
 )
-from database import insert_jobs_bulk
+from database import insert_jobs_bulk, purge_old_jobs
 
 logger = logging.getLogger("scraper")
 
@@ -89,6 +90,7 @@ def scrape_all_roles() -> dict:
     started_at = datetime.now(timezone.utc).isoformat()
     total_scraped = 0
     total_inserted = 0
+    total_purged = 0
     errors: list[str] = []
 
     logger.info("=" * 60)
@@ -144,18 +146,24 @@ def scrape_all_roles() -> dict:
                 errors.append(err_msg)
 
     finished_at = datetime.now(timezone.utc).isoformat()
+    total_purged = purge_old_jobs(JOB_RETENTION_DAYS)
     summary = {
         "started_at": started_at,
         "finished_at": finished_at,
         "total_scraped": total_scraped,
         "total_inserted": total_inserted,
         "total_duplicates": total_scraped - total_inserted,
+        "total_purged": total_purged,
+        "retention_days": JOB_RETENTION_DAYS,
         "errors": errors,
         "error_count": len(errors),
     }
 
     logger.info("\n" + "=" * 60)
-    logger.info(f"✅ Scrape complete: {total_scraped} scraped, {total_inserted} new, {len(errors)} errors")
+    logger.info(
+        f"✅ Scrape complete: {total_scraped} scraped, {total_inserted} new, "
+        f"{total_purged} purged, {len(errors)} errors"
+    )
     logger.info("=" * 60)
 
     return summary
