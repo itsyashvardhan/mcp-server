@@ -136,7 +136,7 @@ curl http://localhost:8000/roles
 
 ### Railway
 
-1. Push the `jobs-mcp-server/` directory to a new GitHub repo (or subdirectory).
+1. Fork the `mcp-server` repo to a new GitHub repo (or subdirectory).
 2. Connect Railway to the repo.
 3. Railway auto-detects the Dockerfile.
 4. Add a **Volume** at `/data` to persist the SQLite DB.
