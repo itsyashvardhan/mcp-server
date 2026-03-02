@@ -38,9 +38,6 @@ CREATE INDEX IF NOT EXISTS idx_jobs_job_title    ON jobs(job_title);
 """
 
 
-# ---------------------------------------------------------------------------
-# Connection helpers
-# ---------------------------------------------------------------------------
 def get_connection() -> sqlite3.Connection:
     """Return a new connection with WAL mode and row factory."""
     conn = sqlite3.connect(str(DB_PATH), timeout=10)
@@ -103,7 +100,6 @@ def insert_jobs(jobs: list[dict[str, Any]]) -> int:
                 )
                 inserted += conn.total_changes  # Running total — we'll reconcile below
             except sqlite3.IntegrityError:
-                # Duplicate — skip
                 pass
         conn.commit()
 

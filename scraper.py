@@ -49,7 +49,6 @@ def _normalize_salary(row) -> str:
 
 def _normalize_job(row, site: str, tier_name: str, query: str) -> dict:
     """Convert a Jobspy DataFrame row into our standard job dict."""
-    # Handle location — Jobspy may return city, state separately
     location_parts: list[str] = []
     for field in ("city", "state", "country"):
         val = row.get(field)
@@ -57,17 +56,14 @@ def _normalize_job(row, site: str, tier_name: str, query: str) -> dict:
             location_parts.append(str(val).strip())
     location = ", ".join(location_parts) if location_parts else str(row.get("location", "")).strip()
 
-    # Handle apply link
     apply_link = str(row.get("job_url", "") or row.get("job_url_direct", "") or "")
 
-    # Date posted
     date_posted = row.get("date_posted", "")
     if hasattr(date_posted, "isoformat"):
         date_posted = date_posted.isoformat()
     elif str(date_posted).lower() == "nan":
         date_posted = ""
 
-    # Description (truncate to save space)
     description = str(row.get("description", "") or "")
     if len(description) > 1000:
         description = description[:997] + "..."
@@ -122,13 +118,11 @@ def scrape_all_roles() -> dict:
                     logger.info(f"      ⚪ No results for '{query}'")
                     continue
 
-                # Convert DataFrame rows to dicts
                 jobs: list[dict] = []
                 for _, row in df.iterrows():
                     site = str(row.get("site", "unknown"))
                     normalized = _normalize_job(row, site, tier_name, query)
 
-                    # Skip rows missing critical fields
                     if not normalized["job_title"] or not normalized["company"]:
                         continue
 
@@ -136,7 +130,6 @@ def scrape_all_roles() -> dict:
 
                 total_scraped += len(jobs)
 
-                # Bulk insert with dedup
                 newly_inserted = insert_jobs_bulk(jobs)
                 total_inserted += newly_inserted
 

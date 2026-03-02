@@ -27,9 +27,6 @@ from config import ALLOWED_ORIGINS, HOST, PORT, ROLE_TIERS, SCRAPE_INTERVAL_HOUR
 from database import count_jobs, init_db, query_jobs
 from scraper import scrape_all_roles
 
-# ---------------------------------------------------------------------------
-# Logging
-# ---------------------------------------------------------------------------
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s | %(name)-12s | %(levelname)-7s | %(message)s",
@@ -37,9 +34,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger("main")
 
-# ---------------------------------------------------------------------------
-# Global state for last scrape status
-# ---------------------------------------------------------------------------
 _last_scrape: dict[str, Any] = {"status": "pending", "message": "No scrape has run yet."}
 
 
@@ -64,32 +58,23 @@ def _run_scrape() -> None:
         }
 
 
-# ---------------------------------------------------------------------------
-# Scheduler
-# ---------------------------------------------------------------------------
 scheduler = BackgroundScheduler()
 
 
-# ---------------------------------------------------------------------------
-# Lifespan (startup / shutdown)
-# ---------------------------------------------------------------------------
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Initialize DB, start scheduler, and run initial scrape on startup."""
     logger.info("🚀 Starting Job Listings MCP Server")
 
-    # 1. Initialize database
     init_db()
     logger.info("📦 Database initialized")
 
-    # 2. Run an initial scrape immediately in the background
     import threading
 
     initial_scrape = threading.Thread(target=_run_scrape, daemon=True)
     initial_scrape.start()
     logger.info("🔍 Initial scrape started in background")
 
-    # 3. Schedule recurring scrapes
     scheduler.add_job(
         _run_scrape,
         trigger=IntervalTrigger(hours=SCRAPE_INTERVAL_HOURS),
@@ -100,16 +85,12 @@ async def lifespan(app: FastAPI):
     scheduler.start()
     logger.info(f"⏰ Scheduler started — interval: {SCRAPE_INTERVAL_HOURS}h")
 
-    yield  # App is running
+    yield
 
-    # Shutdown
     scheduler.shutdown(wait=False)
     logger.info("🛑 Scheduler shut down")
 
 
-# ---------------------------------------------------------------------------
-# FastAPI App
-# ---------------------------------------------------------------------------
 app = FastAPI(
     title="Job Listings MCP Server",
     description="Scrapes and serves fresh job listings for the portfolio live feed.",
@@ -117,7 +98,6 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
@@ -127,9 +107,6 @@ app.add_middleware(
 )
 
 
-# ---------------------------------------------------------------------------
-# Endpoints
-# ---------------------------------------------------------------------------
 @app.get("/", tags=["Health"])
 async def health_check():
     """Health check with basic stats."""
@@ -209,9 +186,6 @@ async def get_roles():
     }
 
 
-# ---------------------------------------------------------------------------
-# Entrypoint
-# ---------------------------------------------------------------------------
 if __name__ == "__main__":
     uvicorn.run(
         "main:app",
